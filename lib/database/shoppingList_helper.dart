@@ -3,6 +3,7 @@
 import 'package:path/path.dart';
 import 'package:shoppinglist_app/model/category_model.dart';
 import 'package:shoppinglist_app/model/item_model.dart';
+import 'package:shoppinglist_app/model/user_model.dart';
 import 'package:sqflite/sqflite.dart';
 
 class ShoppinglistHelper {
@@ -18,7 +19,7 @@ class ShoppinglistHelper {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       // enable foreign key
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
@@ -228,5 +229,34 @@ class ShoppinglistHelper {
       return false;
     }
     return data.first['value'] == 1;
+  }
+
+  // get user
+  Future<UserModel> getUser() async {
+    var openDB = await initDatabase();
+
+    var data = await openDB.query(
+      userTable,
+      where: 'id = ?',
+      whereArgs: [1],
+      limit: 1,
+    );
+
+    if (data.isEmpty) {
+      return const UserModel();
+    }
+    return UserModel.fromMap(data.first);
+  }
+
+  // update user
+  Future<int> updateUser(UserModel user) async {
+    var openDB = await initDatabase();
+
+    return await openDB.update(
+      userTable,
+      user.toMap(),
+      where: 'id = ?',
+      whereArgs: [user.id],
+    );
   }
 }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shoppinglist_app/controller/user_controller.dart';
 import 'package:shoppinglist_app/views/editprofile_page.dart';
 import 'package:shoppinglist_app/views/widgets/homestat_widget.dart';
+import 'dart:io';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -9,6 +11,7 @@ class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final userData = ref.watch(userProvider);
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
@@ -23,10 +26,8 @@ class HomePage extends ConsumerWidget {
                     padding: const EdgeInsets.all(2),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-
                       border: Border.all(color: Color(0xFF12B76A), width: 1.5),
                     ),
-
                     child: InkWell(
                       onTap: () => Navigator.push(
                         context,
@@ -34,9 +35,31 @@ class HomePage extends ConsumerWidget {
                           builder: (context) => EditprofilePage(),
                         ),
                       ),
-                      child: CircleAvatar(
-                        radius: 18,
-                        backgroundImage: AssetImage('Assets/profile.png'),
+                      child: userData.when(
+                        data: (data) {
+                          final String image = data.image.isNotEmpty
+                              ? data.image
+                              : 'Assets/image.png';
+
+                          return CircleAvatar(
+                            radius: 18,
+                            backgroundImage: image.startsWith('Assets/')
+                                ? AssetImage(image)
+                                : FileImage(File(image)) as ImageProvider,
+                          );
+                        },
+                        error: (error, stackTrace) {
+                          return CircleAvatar(
+                            radius: 18,
+                            backgroundImage: AssetImage('Assets/image.png'),
+                          );
+                        },
+                        loading: () {
+                          return CircleAvatar(
+                            radius: 18,
+                            backgroundImage: AssetImage('Assets/image.png'),
+                          );
+                        },
                       ),
                     ),
                   ),

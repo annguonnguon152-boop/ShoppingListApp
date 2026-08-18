@@ -213,6 +213,7 @@ class _AddCategoryPageState extends ConsumerState<AddCategoryPage> {
                         .insertCategory(category);
 
                     if (mounted) {
+                      // ignore: use_build_context_synchronously
                       Navigator.pop(context);
                     }
                   },
