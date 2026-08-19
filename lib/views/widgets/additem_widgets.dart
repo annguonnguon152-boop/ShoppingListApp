@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 // title
@@ -64,6 +66,8 @@ Widget addItemField({
 Widget addPhotoField({
   required BuildContext context,
   required VoidCallback onTap,
+  required File? image,
+  TransformationController? transformationController,
 }) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
   return InkWell(
@@ -71,50 +75,97 @@ Widget addPhotoField({
     borderRadius: BorderRadius.circular(14),
     child: Container(
       width: double.infinity,
-      height: 195,
+      height: 230,
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1A2420) : const Color(0xFFF0F5F2),
-
-        borderRadius: BorderRadius.circular(14),
-
+        color: isDark ? const Color(0xFF1A2420) : Color(0xFFF0F5F2),
+        borderRadius: BorderRadius.circular(15),
         border: Border.all(
-          color: isDark ? const Color(0xFF385047) : const Color(0xFFC7D6CE),
+          color: isDark ? Color(0xFF385047) : Color(0xFFC7D6CE),
         ),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF123D2C) : const Color(0xFFDDF8EC),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.add_a_photo_outlined,
-              size: 25,
-              color: isDark ? const Color(0xFF2DD47E) : const Color(0xFF079455),
-            ),
-          ),
-          SizedBox(height: 10),
-          Text(
-            'Add Product Photo',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: isDark ? const Color(0xFF2DD47E) : const Color(0xFF079455),
-            ),
-          ),
-          SizedBox(height: 5),
-          Text(
-            'High-quality images help identify items faster',
-            style: TextStyle(
-              fontSize: 14,
-              color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-            ),
-          ),
-        ],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(15),
+        child: image != null
+            ? Stack(
+                fit: StackFit.expand,
+                children: [
+                  InteractiveViewer(
+                    transformationController: transformationController,
+                    panEnabled: true,
+                    scaleEnabled: true,
+                    minScale: 1.0,
+                    maxScale: 3.5,
+                    child: Image.file(
+                      image,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
+                    ),
+                  ),
+
+                  Positioned(
+                    right: 10,
+                    top: 10,
+                    child: Container(
+                      width: 35,
+                      height: 35,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.55),
+                        shape: BoxShape.circle,
+                      ),
+
+                      child: Icon(
+                        Icons.edit_outlined,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? const Color(0xFF123D2C)
+                          : const Color(0xFFDDF8EC),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.add_a_photo_outlined,
+                      size: 25,
+                      color: isDark
+                          ? const Color(0xFF2DD47E)
+                          : const Color(0xFF079455),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Add Product Photo',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: isDark
+                          ? const Color(0xFF2DD47E)
+                          : const Color(0xFF079455),
+                    ),
+                  ),
+                  SizedBox(height: 5),
+                  Text(
+                    'High-quality images help identify items faster',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: isDark
+                          ? Colors.grey.shade400
+                          : Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
       ),
     ),
   );

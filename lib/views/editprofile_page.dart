@@ -298,6 +298,7 @@ class EditprofilePage extends ConsumerWidget {
         },
         loading: () {
           Center(child: CircularProgressIndicator(color: Color(0xFF12B76A)));
+          return;
         },
       ),
     );

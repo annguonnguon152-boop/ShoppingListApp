@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shoppinglist_app/controller/category_controller.dart';
+import 'package:shoppinglist_app/controller/image_controller.dart';
 import 'package:shoppinglist_app/views/widgets/additem_widgets.dart';
+import 'package:shoppinglist_app/views/widgets/changephotodialog_widget.dart';
 
 class AdditemPage extends ConsumerWidget {
   const AdditemPage({super.key});
@@ -9,6 +11,7 @@ class AdditemPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final categories = ref.watch(categoryProvider);
+    final imageController = ref.watch(imageProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
@@ -51,8 +54,18 @@ class AdditemPage extends ConsumerWidget {
 
             SizedBox(height: 8),
 
-            addPhotoField(context: context, onTap: () {}),
-
+            addPhotoField(
+              context: context,
+              image: imageController.image,
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return changePhotoDialog(context: context, ref: ref);
+                  },
+                );
+              },
+            ),
             SizedBox(height: 20),
             addItemLabel(context: context, title: 'Item Name'),
 
@@ -61,7 +74,6 @@ class AdditemPage extends ConsumerWidget {
 
             SizedBox(height: 18),
             addItemLabel(context: context, title: 'Category'),
-
             SizedBox(height: 8),
 
             categories.when(
@@ -70,7 +82,6 @@ class AdditemPage extends ConsumerWidget {
                   builder: (context, constraints) {
                     return DropdownMenu<int>(
                       width: constraints.maxWidth,
-
                       hintText: 'Select Category',
 
                       inputDecorationTheme: InputDecorationTheme(
@@ -142,8 +153,86 @@ class AdditemPage extends ConsumerWidget {
               hint: 'Add longer notes, brand preference, or other details...',
               maxLines: 6,
             ),
-            SizedBox(height: 40),
+            SizedBox(height: 30),
           ],
+        ),
+      ),
+
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+            border: Border(
+              top: BorderSide(
+                color: isDark
+                    ? const Color(0xFF333333)
+                    : const Color(0xFFE5E7EB),
+              ),
+            ),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: SizedBox(
+                  height: 50,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      backgroundColor: isDark
+                          ? const Color(0xFF3A3026)
+                          : const Color(0xFFFFE0B2),
+                      foregroundColor: isDark
+                          ? const Color(0xFFFFCC80)
+                          : const Color(0xFF6B3F16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                    onPressed: () {
+                      ref.read(imageProvider).clearImage();
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              SizedBox(width: 15),
+              Expanded(
+                flex: 4,
+                child: SizedBox(
+                  height: 50,
+                  child: ElevatedButton.icon(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      backgroundColor: Color(0xFF079455),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                    icon: Icon(Icons.add_circle_outline, size: 18),
+                    label: Text(
+                      'Save Item',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
