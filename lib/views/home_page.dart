@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shoppinglist_app/controller/item_controller.dart';
 import 'package:shoppinglist_app/controller/user_controller.dart';
 import 'package:shoppinglist_app/views/editprofile_page.dart';
 import 'package:shoppinglist_app/views/widgets/homestat_widget.dart';
@@ -7,9 +8,11 @@ import 'dart:io';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final itemData = ref.watch(itemProvider);
+    final itemController = ref.read(itemProvider.notifier);
+    final favCount = itemData.value?.where((e) => e.isFav == true).length ?? 0;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final userData = ref.watch(userProvider);
     return Scaffold(
@@ -106,7 +109,7 @@ class HomePage extends ConsumerWidget {
                       context: context,
                       icon: Icons.shopping_bag_outlined,
                       title: 'Total Items',
-                      value: '24',
+                      value: itemController.totalItems.toStringAsFixed(0),
                       iconColor: const Color(0xFF3D8B68),
                       iconBg: const Color(0xFFDDF8EC),
                     ),
@@ -154,15 +157,37 @@ class HomePage extends ConsumerWidget {
                   ),
                 ],
               ),
+              SizedBox(height: 15),
+              Row(
+                children: [
+                  Expanded(
+                    child: homeStatCard(
+                      context: context,
+                      icon: Icons.favorite_outline,
+                      title: 'Favorites',
+                      value: favCount.toString(),
+                      iconColor: const Color(0xFFEF4444),
+                      iconBg: const Color(0xFFFEE2E2),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  const Expanded(child: SizedBox()),
+                ],
+              ),
               SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Recent Shopping List'),
-                  TextButton(onPressed: () {}, child: Text('See All')),
+                  Text(
+                    'Recent Shopping List',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  ),
+                  TextButton(
+                    onPressed: () {},
+                    child: Text('See All', style: TextStyle(fontSize: 17)),
+                  ),
                 ],
               ),
-
               SizedBox(height: 10),
             ],
           ),

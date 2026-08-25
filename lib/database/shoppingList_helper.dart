@@ -8,6 +8,7 @@ import 'package:sqflite/sqflite.dart';
 
 class ShoppinglistHelper {
   String dbName = "shoplistdb124.db";
+
   String categoryTable = "category";
   String itemTable = "shopping_items";
   String itemView = "v_items";
@@ -19,78 +20,88 @@ class ShoppinglistHelper {
 
     return await openDatabase(
       path,
-      version: 2,
+      version: 4,
+
       // enable foreign key
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
 
+      // Create Database
       onCreate: (db, version) async {
         // category table
         await db.execute("""
-        CREATE TABLE $categoryTable(
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT NOT NULL UNIQUE,
-          icon TEXT NOT NULL
-        )
-      """);
+            CREATE TABLE $categoryTable(
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              name TEXT NOT NULL UNIQUE,
+              icon TEXT NOT NULL
+            )
+          """);
 
         // item table
         await db.execute("""
-        CREATE TABLE shopping_items(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            category_id INTEGER,
-            estimate_price REAL,
-            unit TEXT,
-            description TEXT,
-            image TEXT,
-            is_fav INTEGER DEFAULT 0,
-            status INTEGER DEFAULT 1,
-            FOREIGN KEY (category_id) REFERENCES category(id)
-          )
-        """);
+            CREATE TABLE $itemTable(
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              name TEXT NOT NULL,
+              category_id INTEGER,
+              estimate_price REAL,
+              discount REAL,
+              unit TEXT,
+              description TEXT,
+              image TEXT,
+              is_fav INTEGER DEFAULT 0,
+              status INTEGER DEFAULT 1,
 
-        // view item
+              FOREIGN KEY (category_id)
+              REFERENCES $categoryTable(id)
+            )
+          """);
+
+        // item view
         await db.execute("""
-        CREATE VIEW $itemView AS
+            CREATE VIEW $itemView AS
+
             SELECT
-                    i.id,
-                    i.name,
-                    c.name AS category_name,
-                    i.estimate_price,
-                    i.unit,
-                    i.description,
-                    i.image,
-                    i.is_fav,
-                    i.status
-          FROM $itemTable i
-          LEFT JOIN $categoryTable c
-          ON i.category_id = c.id
-      """);
+              i.id,
+              i.name,
+              i.category_id,
+              c.name AS category_name,
+              i.estimate_price,
+              i.discount,
+              i.unit,
+              i.description,
+              i.image,
+              i.is_fav,
+              i.status
+
+            FROM $itemTable i
+
+            LEFT JOIN $categoryTable c
+            ON i.category_id = c.id
+          """);
 
         // app settings
         await db.execute("""
-          CREATE TABLE $appSettings(
-            setting_key TEXT PRIMARY KEY,
-            value INTEGER NOT NULL
-          )
-        """);
+            CREATE TABLE $appSettings(
+              setting_key TEXT PRIMARY KEY,
+              value INTEGER NOT NULL
+            )
+          """);
 
-        // profile
+        // user profile
         await db.execute("""
-          CREATE TABLE $userTable(
-          id INTEGER PRIMARY KEY,
-          name TEXT,
-          email TEXT,
-          phone TEXT,
-          preference TEXT,
-          store_location TEXT,
-          image TEXT
-          )
-      """);
+            CREATE TABLE $userTable(
+              id INTEGER PRIMARY KEY,
+              name TEXT,
+              email TEXT,
+              phone TEXT,
+              preference TEXT,
+              store_location TEXT,
+              image TEXT
+            )
+          """);
 
-        // guess acc user
+        // default local user
         await db.insert(userTable, {
           'id': 1,
           'name': 'Local Shopper',
@@ -102,22 +113,21 @@ class ShoppinglistHelper {
         });
       },
 
+      // Upgrade Databas
       onUpgrade: (db, oldVersion, newVersion) async {
-        // upgrade user table
         if (oldVersion < 2) {
           await db.execute("""
-          CREATE TABLE $userTable(
-          id INTEGER PRIMARY KEY,
-          name TEXT,
-          email TEXT,
-          phone TEXT,
-          preference TEXT,
-          store_location TEXT,
-          image TEXT
-          )
-      """);
+              CREATE TABLE $userTable(
+                id INTEGER PRIMARY KEY,
+                name TEXT,
+                email TEXT,
+                phone TEXT,
+                preference TEXT,
+                store_location TEXT,
+                image TEXT
+              )
+            """);
 
-          // guess acc user
           await db.insert(userTable, {
             'id': 1,
             'name': 'Local Shopper',
@@ -127,6 +137,61 @@ class ShoppinglistHelper {
             'store_location': '',
             'image': 'Assets/image.png',
           }, conflictAlgorithm: ConflictAlgorithm.ignore);
+        }
+
+        if (oldVersion < 3) {
+          // delete old view
+          await db.execute('DROP VIEW IF EXISTS $itemView');
+
+          // create new view
+          await db.execute("""
+              CREATE VIEW $itemView AS
+
+              SELECT
+                i.id,
+                i.name,
+                i.category_id,
+                c.name AS category_name,
+                i.estimate_price,
+                i.unit,
+                i.description,
+                i.image,
+                i.is_fav,
+                i.status
+
+              FROM $itemTable i
+              LEFT JOIN $categoryTable c
+              ON i.category_id = c.id
+            """);
+        }
+        
+        // add discount column and recreate item view
+        if (oldVersion < 4) {
+          await db.execute('ALTER TABLE $itemTable ADD COLUMN discount REAL');
+          // delete old view
+          await db.execute('DROP VIEW IF EXISTS $itemView');
+
+          await db.execute("""
+                CREATE VIEW $itemView AS
+
+                SELECT
+                  i.id,
+                  i.name,
+                  i.category_id,
+                  c.name AS category_name,
+                  i.estimate_price,
+                  i.discount,
+                  i.unit,
+                  i.description,
+                  i.image,
+                  i.is_fav,
+                  i.status
+
+                FROM $itemTable i
+
+                LEFT JOIN $categoryTable c
+                ON i.category_id = c.id
+          """);
         }
       },
     );
@@ -151,6 +216,13 @@ class ShoppinglistHelper {
     return data.map((e) => CategoryModel.fromMap(e)).toList();
   }
 
+  // delete category
+  Future<int> deleteCategory(int id) async {
+    final db = await initDatabase();
+
+    return await db.delete(categoryTable, where: 'id = ?', whereArgs: [id]);
+  }
+
   // search category
   Future<List<CategoryModel>> searchCategory(String search) async {
     var openDB = await initDatabase();
@@ -165,69 +237,101 @@ class ShoppinglistHelper {
     return data.map((e) => CategoryModel.fromMap(e)).toList();
   }
 
-  // inseert item
+  // ITEM
+  // insert item
   Future<int> insertItem(ItemModel item) async {
     var openDB = await initDatabase();
+
     return await openDB.insert(itemTable, item.toMap());
   }
 
   // get all items
   Future<List<ItemModel>> getAllItems() async {
     var openDB = await initDatabase();
+
     var data = await openDB.query(
       itemView,
       where: 'status = ?',
       whereArgs: [1],
-      orderBy: 'id ASC',
+      orderBy: 'id DESC',
     );
+
     return data.map((e) => ItemModel.fromMap(e)).toList();
   }
 
-  // update isFav
+  //item count
+  Future<int> getTotalItems() async {
+    var openDB = await initDatabase();
+    final result = await openDB.rawQuery('''
+          SELECT COUNT(*) AS total 
+          FROM $itemTable
+        ''');
+    return result.first['total'] as int? ?? 0;
+  }
+
+  // count fav item
+  Future<int> getTotalFavItems() async {
+    var openDB = await initDatabase();
+    final result = await openDB.rawQuery('''
+            SELECT COUNT(*) AS total 
+            FROM $itemTable
+            WHERE is_fav = 1
+        ''');
+    return result.first['total'] as int? ?? 0;
+  }
+
+  // update favorite
   Future<void> updateFavorite(int id, bool isFav) async {
     var openDB = await initDatabase();
+
     await openDB.update(
       itemTable,
       {'is_fav': isFav ? 1 : 0},
-      where: 'id=?',
+      where: 'id = ?',
       whereArgs: [id],
     );
   }
 
-  // get only fav items
+  // get favorite items
   Future<List<ItemModel>> getFavorite() async {
     var openDB = await initDatabase();
+
+    // use view so category_name is available
     var data = await openDB.query(
-      itemTable,
-      where: 'is_fav = ? and status = ?',
+      itemView,
+      where: 'is_fav = ? AND status = ?',
       whereArgs: [1, 1],
       orderBy: 'id DESC',
     );
+
     return data.map((e) => ItemModel.fromMap(e)).toList();
   }
 
   // save dark mode
   Future<void> saveDarkMode(bool isDark) async {
     var openDB = await initDatabase();
+
     await openDB.insert(appSettings, {
       'setting_key': 'dark_mode',
       'value': isDark ? 1 : 0,
     }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  // get darkMode
-  // ignore: unused_element
+  // get dark mode
   Future<bool> getDarkMode() async {
     var openDB = await initDatabase();
+
     var data = await openDB.query(
       appSettings,
       where: 'setting_key = ?',
       whereArgs: ['dark_mode'],
       limit: 1,
     );
+
     if (data.isEmpty) {
       return false;
     }
+
     return data.first['value'] == 1;
   }
 
@@ -245,6 +349,7 @@ class ShoppinglistHelper {
     if (data.isEmpty) {
       return const UserModel();
     }
+
     return UserModel.fromMap(data.first);
   }
 

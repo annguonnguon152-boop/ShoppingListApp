@@ -357,20 +357,15 @@ class SettingsPage extends ConsumerWidget {
 
                   onTap: () {},
                 ),
-
                 settingDivider(context: context),
-
                 settingSwitchTile(
                   context: context,
                   icon: Icons.notifications_none_rounded,
                   iconColor: const Color(0xFFF59E0B),
                   iconBackground: const Color(0xFFFFF4DD),
-
                   title: 'Notifications',
                   subtitle: 'Shopping reminders & updates',
-
                   value: false,
-
                   onChanged: (value) {},
                 ),
               ],
@@ -378,7 +373,6 @@ class SettingsPage extends ConsumerWidget {
           ),
 
           SizedBox(height: 25),
-
           // shopping
           Text(
             'SHOPPING',
@@ -389,21 +383,16 @@ class SettingsPage extends ConsumerWidget {
               color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
             ),
           ),
-
           SizedBox(height: 10),
-
           Container(
             decoration: BoxDecoration(
               color: theme.cardColor,
-
               borderRadius: BorderRadius.circular(18),
-
               border: Border.all(
                 color: isDark
                     ? Colors.white.withValues(alpha: 0.08)
                     : Colors.grey.shade200,
               ),
-
               boxShadow: isDark
                   ? []
                   : [
@@ -414,20 +403,15 @@ class SettingsPage extends ConsumerWidget {
                       ),
                     ],
             ),
-
             child: Column(
               children: [
                 // favorite
                 settingTile(
                   context: context,
                   icon: Icons.favorite_border_rounded,
-
                   iconColor: const Color(0xFFE84A5F),
-
                   iconBackground: const Color(0xFFFFECEF),
-
                   title: 'Favorite Items',
-
                   subtitle: 'Quick access to your favorite items',
 
                   onTap: () {
@@ -478,9 +462,7 @@ class SettingsPage extends ConsumerWidget {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => const AdditemPage(),
-                      ),
+                      MaterialPageRoute(builder: (context) => AdditemPage()),
                     );
                   },
                 ),

@@ -98,3 +98,14 @@ Widget homeStatCard({
     ),
   );
 }
+
+// Widget monthlyBudgetCard({
+//   required BuildContext context,
+//   required String amount,
+//   required String limit,
+//   required double progress,
+// }) {
+//   final isDark = Theme.of(context).brightness == Brightness.dark;
+//   final 
+//   return
+// }

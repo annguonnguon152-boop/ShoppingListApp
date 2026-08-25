@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:shoppinglist_app/database/shoppingList_helper.dart';
 import 'package:shoppinglist_app/model/category_model.dart';
 
@@ -40,3 +41,6 @@ final categoryProvider =
     AsyncNotifierProvider<CategoryNotifier, List<CategoryModel>>(
       CategoryNotifier.new,
     );
+
+//select category
+final selectedCategoryProvider = StateProvider<int?>((ref) => null);

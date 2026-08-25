@@ -9,7 +9,7 @@ Widget changePhotoDialog({
 }) {
   return SimpleDialog(
     title: Text(
-      'Change Photo',
+      'Select Photo',
       style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
     ),
 
@@ -18,9 +18,7 @@ Widget changePhotoDialog({
       SimpleDialogOption(
         onPressed: () async {
           await ref.read(imageProvider).getImageGallery();
-
           final pickedImage = ref.read(imageProvider).image;
-
           if (pickedImage != null) {
             ref.read(userProvider.notifier).changeImage(pickedImage.path);
           }
