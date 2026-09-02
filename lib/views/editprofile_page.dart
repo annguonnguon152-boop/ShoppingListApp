@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shoppinglist_app/controller/image_controller.dart';
 import 'package:shoppinglist_app/controller/user_controller.dart';
-import 'package:shoppinglist_app/views/widgets/changephotodialog_widget.dart';
+import 'package:shoppinglist_app/views/dialog/imagepicker_dialog.dart';
 import 'package:shoppinglist_app/views/widgets/profile_widget.dart';
 
 class EditprofilePage extends ConsumerWidget {
@@ -15,14 +15,12 @@ class EditprofilePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final data = ref.watch(userProvider);
-    final imageController = ref.watch(imageProvider);
+    final imageController = ref.watch(profileImageProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final backgroundColor = isDark
         ? const Color(0xFF121212)
         : const Color(0xFFF8F9FB);
-    final textColor = isDark
-        ? const Color(0xFFF8F9FB)
-        : Colors.black;
+    final textColor = isDark ? const Color(0xFFF8F9FB) : Colors.black;
 
     return Scaffold(
       appBar: AppBar(
@@ -70,7 +68,7 @@ class EditprofilePage extends ConsumerWidget {
           IconButton(
             onPressed: () async {
               await ref.read(userProvider.notifier).updateUser();
-              ref.read(imageProvider).clearImage();
+              ref.read(profileImageProvider).clearImage();
 
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -149,9 +147,16 @@ class EditprofilePage extends ConsumerWidget {
                               showDialog(
                                 context: context,
                                 builder: (dialogContext) {
-                                  return changePhotoDialog(
+                                  return imagePickerDialog(
                                     context: dialogContext,
-                                    ref: ref,
+                                    imageController: ref.read(
+                                      profileImageProvider,
+                                    ),
+                                    onImagePicked: (imagePath) {
+                                      ref
+                                          .read(userProvider.notifier)
+                                          .changeImage(imagePath);
+                                    },
                                   );
                                 },
                               );
@@ -216,7 +221,7 @@ class EditprofilePage extends ConsumerWidget {
                           ref.read(userProvider.notifier).changeName(value);
                         },
                       ),
-                       SizedBox(height: 14),
+                      SizedBox(height: 14),
 
                       profileField(
                         context: context,
@@ -229,7 +234,7 @@ class EditprofilePage extends ConsumerWidget {
                           ref.read(userProvider.notifier).changeEmail(value);
                         },
                       ),
-                       SizedBox(height: 14),
+                      SizedBox(height: 14),
                       profileField(
                         context: context,
                         title: 'Phone Number',
@@ -244,7 +249,7 @@ class EditprofilePage extends ConsumerWidget {
                     ],
                   ),
 
-                   SizedBox(height: 16),
+                  SizedBox(height: 16),
 
                   // shopping preferences
                   profileSection(
@@ -265,7 +270,7 @@ class EditprofilePage extends ConsumerWidget {
                         },
                       ),
 
-                       SizedBox(height: 10),
+                      SizedBox(height: 10),
 
                       profileField(
                         context: context,

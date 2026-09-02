@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:shoppinglist_app/database/shoppingList_helper.dart';
@@ -44,3 +45,20 @@ final categoryProvider =
 
 //select category
 final selectedCategoryProvider = StateProvider<int?>((ref) => null);
+
+final categoryIconProvider = Provider.family<IconData, int>((ref, categoryId) {
+  final categories = ref.watch(categoryProvider);
+
+  return categories.maybeWhen(
+    data: (data) {
+      for (final category in data) {
+        if (category.id == categoryId) {
+          return category.iconData;
+        }
+      }
+
+      return Icons.category_outlined;
+    },
+    orElse: () => Icons.category_outlined,
+  );
+});

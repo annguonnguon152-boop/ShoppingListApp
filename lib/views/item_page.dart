@@ -1,20 +1,76 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shoppinglist_app/controller/cart_controller.dart';
 import 'package:shoppinglist_app/controller/category_controller.dart';
 import 'package:shoppinglist_app/controller/item_controller.dart';
+import 'package:shoppinglist_app/views/cart_page.dart';
 import 'package:shoppinglist_app/views/searchitem_page.dart';
-import 'package:shoppinglist_app/views/widgets/catalogitem_widget.dart';
+import 'package:shoppinglist_app/views/widgets/items_widget.dart';
 
-class ItemcatalogPage extends ConsumerWidget {
-  const ItemcatalogPage({super.key});
+class ItemPage extends ConsumerWidget {
+  const ItemPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final items = ref.watch(itemProvider);
     final categories = ref.watch(categoryProvider);
-    final selectCategoryId = ref.watch(selectedCategoryProvider);
+    ref.watch(cartProvider);
+    final cartCount = ref.read(cartProvider.notifier).cartCounter;
+    final selectCategoryId = ref.watch(itemFilterByCategory);
     return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Browse Items',
+          style: TextStyle(fontWeight: FontWeight.w700),
+        ),
+        centerTitle: true,
+        actions: [
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              IconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => CartPage()),
+                  );
+                },
+                icon: Icon(Icons.shopping_cart_outlined, size: 27),
+              ),
+
+              // Number badge
+              if (cartCount > 0)
+                Positioned(
+                  right: 5,
+                  top: 3,
+                  child: Container(
+                    constraints: const BoxConstraints(
+                      minWidth: 18,
+                      minHeight: 18,
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      cartCount > 99 ? '99+' : cartCount.toString(),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+
+          SizedBox(width: 10),
+        ],
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 18),
@@ -37,8 +93,8 @@ class ItemcatalogPage extends ConsumerWidget {
                   },
                   decoration: InputDecoration(
                     hintText: 'Search for groceries...',
-                    prefixIcon: const Icon(Icons.search),
-                    suffixIcon: const Icon(Icons.tune),
+                    prefixIcon: Icon(Icons.search),
+                    suffixIcon: Icon(Icons.tune),
                     filled: true,
                     fillColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
                     border: OutlineInputBorder(
@@ -66,9 +122,7 @@ class ItemcatalogPage extends ConsumerWidget {
                             name: 'All',
                             selected: selectCategoryId == null,
                             onTap: () {
-                              ref
-                                      .read(selectedCategoryProvider.notifier)
-                                      .state =
+                              ref.read(itemFilterByCategory.notifier).state =
                                   null;
                             },
                           );
@@ -81,7 +135,7 @@ class ItemcatalogPage extends ConsumerWidget {
                           name: category.name,
                           selected: selectCategoryId == category.id,
                           onTap: () {
-                            ref.read(selectedCategoryProvider.notifier).state =
+                            ref.read(itemFilterByCategory.notifier).state =
                                 category.id;
                           },
                         );
@@ -138,7 +192,8 @@ class ItemcatalogPage extends ConsumerWidget {
                             ),
 
                             Text(
-                              '${filteredItems.length} items',
+                              '${filteredItems.length} '
+                              '${filteredItems.length == 1 ? 'item' : 'items'}',
                               style: TextStyle(
                                 fontSize: 17,
                                 color: Colors.grey.shade600,
@@ -169,11 +224,11 @@ class ItemcatalogPage extends ConsumerWidget {
                                     crossAxisCount: 2,
                                     crossAxisSpacing: 12,
                                     mainAxisSpacing: 16,
-                                    childAspectRatio: 0.66,
+                                    childAspectRatio: 0.60,
                                   ),
                               itemBuilder: (context, index) {
                                 final item = filteredItems[index];
-                                return catalogItemCard(
+                                return itemCard(
                                   context: context,
                                   ref: ref,
                                   item: item,

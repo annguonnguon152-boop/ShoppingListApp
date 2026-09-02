@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shoppinglist_app/controller/category_controller.dart';
+import 'package:shoppinglist_app/controller/item_controller.dart';
 import 'package:shoppinglist_app/views/addcategory_page.dart';
+import 'package:shoppinglist_app/views/categoryitem_page.dart';
 import 'package:shoppinglist_app/views/searchCategory_page.dart';
 import 'package:shoppinglist_app/views/widgets/category_widgets.dart';
 import 'package:shoppinglist_app/views/widgets/new_category_widget.dart';
 
 class CategoryPage extends ConsumerWidget {
   const CategoryPage({super.key});
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final categories = ref.watch(categoryProvider);
+    final itemCounts = ref.watch(itemCountsByCategoryProvider);
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -72,6 +74,7 @@ class CategoryPage extends ConsumerWidget {
                         mainAxisSpacing: 14,
                         childAspectRatio: 0.95,
                       ),
+
                       itemBuilder: (context, index) {
                         if (index == 0) {
                           return newCategory(
@@ -87,7 +90,23 @@ class CategoryPage extends ConsumerWidget {
                           );
                         }
                         final category = data[index - 1];
-                        return categoryCard(category: category, itemCount: 0);
+                        final count = itemCounts.value?[category.id] ?? 0;
+                        return categoryCard(
+                          category: category,
+                          itemCount: count,
+                          onTap: () {
+                            ref.read(selectedCategoryProvider.notifier).state =
+                                category.id;
+
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    CategoryitemPage(category: category),
+                              ),
+                            );
+                          },
+                        );
                       },
                     );
                   },

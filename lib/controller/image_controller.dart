@@ -4,20 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 
 class ImageController extends ChangeNotifier {
   final ImagePicker picker = ImagePicker();
 
   File? image;
 
-  //cropping and respositioning
   Future<CroppedFile?> cropImage(String path) async {
     return await ImageCropper().cropImage(
       sourcePath: path,
       uiSettings: [
         AndroidUiSettings(
           toolbarTitle: 'Crop & Adjust Photo',
-          toolbarColor: Color(0xFF123D2C),
+          toolbarColor: const Color(0xFF123D2C),
           toolbarWidgetColor: Colors.white,
           initAspectRatio: CropAspectRatioPreset.original,
           lockAspectRatio: false,
@@ -31,45 +31,74 @@ class ImageController extends ChangeNotifier {
     );
   }
 
-  // Gallery
+  Future<File> saveImagePermanent(String path) async {
+    final directory = await getApplicationDocumentsDirectory();
+
+    final String extension = path.contains('.') ? path.split('.').last : 'jpg';
+
+    final String fileName =
+        'image_${DateTime.now().millisecondsSinceEpoch}.$extension';
+
+    final String newPath = '${directory.path}/$fileName';
+
+    final File newImage = await File(path).copy(newPath);
+
+    return newImage;
+  }
+
   Future<void> getImageGallery() async {
     final XFile? file = await picker.pickImage(
       source: ImageSource.gallery,
       imageQuality: 80,
     );
-    if (file != null) {
-      final CroppedFile? croppedFile = await cropImage(file.path);
-      if (croppedFile != null) {
-        image = File(croppedFile.path);
-      }
-      notifyListeners();
+
+    if (file == null) {
+      return;
     }
+
+    final CroppedFile? croppedFile = await cropImage(file.path);
+
+    if (croppedFile == null) {
+      return;
+    }
+
+    image = await saveImagePermanent(croppedFile.path);
+
+    notifyListeners();
   }
 
-  // Camera
   Future<void> getImageCamera() async {
     final XFile? file = await picker.pickImage(
       source: ImageSource.camera,
       imageQuality: 80,
     );
 
-    if (file != null) {
-      final CroppedFile? croppedFile = await cropImage(file.path);
-      if (croppedFile != null) {
-        image = File(croppedFile.path);
-      }
-      notifyListeners();
+    if (file == null) {
+      return;
     }
+
+    final CroppedFile? croppedFile = await cropImage(file.path);
+
+    if (croppedFile == null) {
+      return;
+    }
+
+    image = await saveImagePermanent(croppedFile.path);
+    notifyListeners();
   }
 
-  // Clear temporary image
   void clearImage() {
     image = null;
     notifyListeners();
   }
 }
 
-final imageProvider = ChangeNotifierProvider.autoDispose<ImageController>((
+final profileImageProvider =
+    ChangeNotifierProvider.autoDispose<ImageController>((ref) {
+      return ImageController();
+    });
+
+final itemImageProvider = ChangeNotifierProvider.autoDispose<ImageController>((
   ref,
 ) {
   return ImageController();

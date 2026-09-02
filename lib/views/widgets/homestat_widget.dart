@@ -84,7 +84,7 @@ Widget homeStatCard({
         // VALUE
         Text(
           value,
-          maxLines: 1,
+          maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontSize: 27,
@@ -106,6 +106,98 @@ Widget homeStatCard({
 //   required double progress,
 // }) {
 //   final isDark = Theme.of(context).brightness == Brightness.dark;
-//   final 
+//   final
 //   return
 // }
+Widget homeRecentShoppingList({
+  required BuildContext context,
+  required bool isDark,
+  required String title,
+  required String date,
+  required int itemCount,
+  required VoidCallback onTap,
+}) {
+  return Material(
+    color: Colors.transparent,
+    child: InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isDark ? const Color(0xFF343434) : const Color(0xFFE4E7EC),
+          ),
+          boxShadow: isDark
+              ? []
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: const Color(0xFF12B76A).withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(11),
+              ),
+              child: const Icon(
+                Icons.receipt_long_outlined,
+                size: 21,
+                color: Color(0xFF12B76A),
+              ),
+            ),
+
+            SizedBox(width: 12),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.white : const Color(0xFF101828),
+                    ),
+                  ),
+
+                  SizedBox(height: 3),
+
+                  Text(
+                    '$date • $itemCount ${itemCount == 1 ? 'item' : 'items'}',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: isDark
+                          ? Colors.grey.shade400
+                          : const Color(0xFF667085),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(width: 8),
+
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 22,
+              color: isDark ? Colors.grey.shade500 : const Color(0xFF98A2B3),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}

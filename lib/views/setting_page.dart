@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shoppinglist_app/controller/theme_controller.dart';
 import 'package:shoppinglist_app/controller/user_controller.dart';
-import 'package:shoppinglist_app/views/additem_page.dart';
+import 'package:shoppinglist_app/views/history_page.dart';
+import 'package:shoppinglist_app/views/itemform_page.dart';
 import 'package:shoppinglist_app/views/editprofile_page.dart';
 import 'package:shoppinglist_app/views/favorite_page.dart';
 import 'package:shoppinglist_app/views/widgets/settings_card.dart';
@@ -98,11 +99,9 @@ class SettingsPage extends ConsumerWidget {
                         children: [
                           Padding(
                             padding: const EdgeInsets.all(8),
-
                             child: Container(
                               width: 75,
                               height: 80,
-
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
 
@@ -413,13 +412,10 @@ class SettingsPage extends ConsumerWidget {
                   iconBackground: const Color(0xFFFFECEF),
                   title: 'Favorite Items',
                   subtitle: 'Quick access to your favorite items',
-
                   onTap: () {
-                    Navigator.pushReplacement(
+                    Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => const FavoritePage(),
-                      ),
+                      MaterialPageRoute(builder: (context) => FavoritePage()),
                     );
                   },
                 ),
@@ -462,7 +458,7 @@ class SettingsPage extends ConsumerWidget {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => AdditemPage()),
+                      MaterialPageRoute(builder: (context) => ItemformPage()),
                     );
                   },
                 ),
@@ -482,7 +478,12 @@ class SettingsPage extends ConsumerWidget {
 
                   subtitle: 'View your previous purchases',
 
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => HistoryPage()),
+                    );
+                  },
                 ),
               ],
             ),

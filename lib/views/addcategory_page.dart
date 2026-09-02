@@ -40,7 +40,7 @@ class _AddCategoryPageState extends ConsumerState<AddCategoryPage> {
             ? Colors.white
             : const Color.fromARGB(255, 21, 22, 21),
         surfaceTintColor: Colors.transparent,
-        title:  Text(
+        title: Text(
           'New Category',
           style: TextStyle(fontWeight: FontWeight.w600),
         ),
@@ -67,7 +67,7 @@ class _AddCategoryPageState extends ConsumerState<AddCategoryPage> {
                 ),
               ),
 
-               SizedBox(height: 10),
+              SizedBox(height: 10),
               TextField(
                 controller: nameController,
                 style: TextStyle(color: isDark ? Colors.white : Colors.black),
@@ -182,9 +182,9 @@ class _AddCategoryPageState extends ConsumerState<AddCategoryPage> {
                           size: 25,
 
                           color: isSelected
-                              ?  Color(0xFF12B76A)
+                              ? Color(0xFF12B76A)
                               : isDark
-                              ?  Color(0xFFA3A3A3)
+                              ? Color(0xFFA3A3A3)
                               : Colors.grey,
                         ),
                       ),
@@ -193,7 +193,7 @@ class _AddCategoryPageState extends ConsumerState<AddCategoryPage> {
                 ),
               ),
 
-              const SizedBox(height: 15),
+              SizedBox(height: 15),
 
               SizedBox(
                 width: double.infinity,
@@ -201,7 +201,7 @@ class _AddCategoryPageState extends ConsumerState<AddCategoryPage> {
 
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:  Color(0xFF12B76A),
+                    backgroundColor: Color(0xFF12B76A),
                     foregroundColor: Colors.white,
                     elevation: 0,
 
@@ -237,7 +237,7 @@ class _AddCategoryPageState extends ConsumerState<AddCategoryPage> {
                       Navigator.pop(context);
                     }
                   },
-                  child:  Text(
+                  child: Text(
                     'Add Category',
 
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),

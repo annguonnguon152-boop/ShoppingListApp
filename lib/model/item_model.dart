@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'package:shoppinglist_app/model/tag_model.dart';
+
 class ItemModel {
   final int? id;
   final String name;
@@ -6,6 +9,7 @@ class ItemModel {
   final double estimatedPrice;
   final double? discount;
   final String? unit;
+  final List<TagModel> tags;
   final String? description;
   final String img;
   final bool isFav;
@@ -19,6 +23,7 @@ class ItemModel {
     this.estimatedPrice = 0,
     this.discount,
     this.unit,
+    this.tags = const [],
     this.description,
     this.img = '',
     this.isFav = false,
@@ -50,6 +55,7 @@ class ItemModel {
       'estimate_price': estimatedPrice,
       'discount': discount,
       'unit': unit,
+      'tags': jsonEncode(tags.map((e) => e.toMap()).toList()),
       'description': description,
       'image': img,
       'is_fav': isFav ? 1 : 0,
@@ -66,10 +72,30 @@ class ItemModel {
       estimatedPrice: (map['estimate_price'] as num?)?.toDouble() ?? 0,
       discount: (map['discount'] as num?)?.toDouble(),
       unit: map['unit'],
+      tags: _parseTags(map['tags']),
       description: map['description'],
       img: map['image'] ?? '',
       isFav: map['is_fav'] == 1,
       status: map['status'] == 1,
     );
+  }
+  static List<TagModel> _parseTags(dynamic value) {
+    if (value == null || value.toString().trim().isEmpty) {
+      return [];
+    }
+
+    try {
+      final decoded = jsonDecode(value.toString());
+
+      if (decoded is List) {
+        return decoded
+            .map((tag) => TagModel.fromMap(Map<String, dynamic>.from(tag)))
+            .toList();
+      }
+
+      return [];
+    } catch (e) {
+      return [];
+    }
   }
 }
